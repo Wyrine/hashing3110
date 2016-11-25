@@ -22,7 +22,7 @@ HashTable::HashTable(int size){
 }
 
 void HashTable::updateLoad(){
-  loadFactor = numItemsInTable / tableSize;
+  loadFactor = (double)numItemsInTable / (double)tableSize;
   if(loadFactor >= MAX_LOAD_FACTOR){
     reHash();
     loadFactor = numItemsInTable/tableSize;
