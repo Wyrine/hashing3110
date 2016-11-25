@@ -4,14 +4,14 @@
 using namespace std;
 
 
-int const DEFAULT_SIZE = 256;
+int const DEFAULT_SIZE = 389;
 #define HASH_MOD hash(value) % tableSize
 
 struct Variable{
   string word;
   int frequency;
   Variable(){ frequency = 0; };
-  Variable(string word);
+  void lowerWord(string word);
 };
 
 class HashTable{
@@ -19,8 +19,9 @@ class HashTable{
     HashTable();          // default constructor with default size 256
     HashTable(int size);  // constructor with size given
     ~HashTable();         // destructor for the table
-    int  lookup(string value);  //lookup only
-    int  lookupInsert(string value);  //lookup and insert
+    int lookup(string value);  //lookup only
+    int lookupInsert(string value);  //lookup and insert
+    void printTable();
     //int remove(const  string value);
   private:
      // Your declarations go here!

@@ -14,6 +14,7 @@ void readFile(){
   }
   double totalTime = (clock() - startTime) / CLOCKS_PER_SEC;
   cout << "It took " << totalTime << " to build the frequency table.\n";
+  myTable.printTable();
   input.close();
 }
 

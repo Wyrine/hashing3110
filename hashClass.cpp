@@ -3,7 +3,7 @@
 using namespace std;
 
 
-Variable::Variable(string word){
+void Variable::lowerWord(string word){
   for(int i = 0; i < word.size(); i++)
     this->word[i] = tolower(word[i]);
   frequency = 1;
@@ -39,16 +39,14 @@ int HashTable::lookupInsert(string value){
   int loc = HASH_MOD;
   if(frequencyTable[loc].word == value) frequencyTable[loc].frequency++;
   else if(frequencyTable[loc].frequency == 0){
-    frequencyTable[loc].word = value;
-    frequencyTable[loc].frequency++;
+    frequencyTable[loc].lowerWord(value);
   }
   else{
     int startLoc = loc;
     loc++;
     for(; loc != startLoc; loc++){
       if(frequencyTable[loc].frequency == 0){
-        frequencyTable[loc].word = value;
-        frequencyTable[loc].frequency++;
+        frequencyTable[loc].lowerWord(value);
         break;
       }
       else if(frequencyTable[loc].word == value) {
@@ -62,6 +60,12 @@ int HashTable::lookupInsert(string value){
   return frequencyTable[loc].frequency;
 }
 
+void HashTable::printTable(){
+  for(int i = 0; i < tableSize; i++){
+    if(frequencyTable[i].frequency != 0) cout << frequencyTable[i].word << endl;
+  }
+}
+
 HashTable::~HashTable(){
   frequencyTable = NULL;
   delete[] frequencyTable;
@@ -70,7 +74,7 @@ HashTable::~HashTable(){
 unsigned long HashTable::hash(string str){
   unsigned long hash = 5381;
   int c, i = 0;
-  while (c = str[i++])
+  while (c = (int)str[i++])
     hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
   return hash;
 }
