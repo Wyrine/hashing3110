@@ -5,3 +5,4 @@
 
 void readFile();
 int getSize();
+void mainMenu(HashTable myTable);

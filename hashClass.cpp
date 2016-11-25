@@ -3,10 +3,17 @@
 using namespace std;
 
 
-void Variable::lowerWord(string word){
-  for(int i = 0; i < word.size(); i++)
-    this->word[i] = tolower(word[i]);
-  frequency = 1;
+bool Variable::insertWord(string str){
+  if (word == str){
+    frequency++;
+    return true;
+  }
+  else if (frequency == 0){
+    word = str;
+    frequency++;
+    return true;
+  }
+  return false;
 }
 
 HashTable::HashTable(){
@@ -26,41 +33,51 @@ HashTable::HashTable(int size){
 void HashTable::updateLoad(){
   loadFactor = numItemsInTable / tableSize;
   if(loadFactor > MAX_LOAD_FACTOR){
-    rehash();
+    reHash();
     loadFactor = numItemsInTable/tableSize;
   }
 }
 
-void HashTable::rehash(){
+void HashTable::reHash(){
   int prevSize = tableSize;
   findPrime();
   Variable* newTable = new Variable[tableSize]();
   for(int i = 0; i < prevSize; i++){
-    if(frequencyTable[i].frequency != 0) return;
+    if(frequencyTable[i].frequency != 0){
+      
+    }
   }
+  frequencyTable = NULL;
+  delete[] frequencyTable;
+  frequencyTable = newTable;
 }
 
 int HashTable::lookup(string value){
-  return frequencyTable[HASH_MOD].frequency;
+  int i;
+  bool reachedStart = false;
+  for(i = 0; i < value.length(); i++)
+    value[i] = tolower(value[i]);
+  for(i = HASH_MOD; i <= tableSize; i++){
+    if(frequencyTable[i].frequency == 0) break;
+    else if(frequencyTable[i].word == value) return frequencyTable[i].frequency;
+    if(i==tableSize && !reachedStart){
+      i = 0;
+      reachedStart = true;
+    }
+  }
+  return 0;
 }
 
 int HashTable::lookupInsert(string value){
   int loc = HASH_MOD;
-  if(frequencyTable[loc].word == value) frequencyTable[loc].frequency++;
-  else if(frequencyTable[loc].frequency == 0){
-    frequencyTable[loc].lowerWord(value);
-  }
+  if(frequencyTable[loc].insertWord(value)) return frequencyTable[loc].frequency;
   else{
     int startLoc = loc;
     loc++;
     for(; loc != startLoc; loc++){
-      if(frequencyTable[loc].frequency == 0){
-        frequencyTable[loc].lowerWord(value);
-        break;
-      }
-      else if(frequencyTable[loc].word == value) {
-        frequencyTable[loc].frequency++;
-        break;
+      if(loc == tableSize) loc = 0;
+      if(frequencyTable[loc].insertWord(value)){
+        return frequencyTable[loc].frequency;
       }
     }
   }
@@ -82,9 +99,9 @@ void HashTable::findPrime(){
 }
 
 void HashTable::printTable(){
-  for(int i = 0; i < tableSize; i++){
-    if(frequencyTable[i].frequency != 0) cout << frequencyTable[i].word << endl;
-  }
+  for(int i = 0; i < tableSize; i++)
+    if(frequencyTable[i].frequency != 0)
+      cout << frequencyTable[i].word << " " << frequencyTable[i].frequency << endl;
 }
 
 HashTable::~HashTable(){
