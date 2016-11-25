@@ -3,12 +3,14 @@
 
 using namespace std;
 
+
 int const DEFAULT_SIZE = 256;
+#define HASH_MOD hash(value) % tableSize
 
 struct Variable{
   string word;
-  unsigned numberOfOccurences;
-  Variable(){ numberOfOccurences = 0; };
+  int frequency;
+  Variable(){ frequency = 0; };
   Variable(string word);
 };
 
@@ -22,8 +24,10 @@ class HashTable{
     //int remove(const  string value);
   private:
      // Your declarations go here!
-     unsigned long hash(unsigned char *str);
+     unsigned long hash(string str);
+     void updateLoad();
      Variable *frequencyTable;
      unsigned long tableSize;
      double loadFactor;
+     int numItemsInTable;
 };

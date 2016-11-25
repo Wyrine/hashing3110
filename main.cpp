@@ -1,8 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include "hashClass.h"
 
 using namespace std;
+
 
 void readFile();
 int getSize();
@@ -16,9 +18,10 @@ void readFile(){
   string inData;
   if(input.fail()) exit(0);
   int tableSize = getSize();
+  HashTable myTable(tableSize);
   double startTime = clock();
   while(input >> inData){
-    //hash it
+    myTable.lookupInsert(inData);
   }
   double totalTime = (clock() - startTime) / CLOCKS_PER_SEC;
   cout << "It took " << totalTime << " to build the frequency table.\n";
