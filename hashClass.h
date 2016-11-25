@@ -4,7 +4,7 @@
 using namespace std;
 
 
-int const DEFAULT_SIZE = 389;
+int const DEFAULT_SIZE = 256;
 double const MAX_LOAD_FACTOR = 0.5;
 #define HASH_MOD hash(bucket) % tableSize
 
@@ -30,7 +30,7 @@ class HashTable{
     //int remove(const  string bucket);
   private:
      // Your declarations go here!
-     bool insert(string bucket, Variable* frequencyTable, int loc);
+     bool insert(string bucket, Variable* frequencyTable, int loc, bool upNum);
      void reHash();
      unsigned long hash(string str);
      void updateLoad();

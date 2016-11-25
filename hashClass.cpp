@@ -23,21 +23,30 @@ HashTable::HashTable(int size){
 
 void HashTable::updateLoad(){
   loadFactor = numItemsInTable / tableSize;
-  if(loadFactor > MAX_LOAD_FACTOR){
+  if(loadFactor >= MAX_LOAD_FACTOR){
     reHash();
     loadFactor = numItemsInTable/tableSize;
   }
 }
 
 void HashTable::reHash(){
-  int prevSize = tableSize;
+  int prevSize = tableSize, loc;
+  string bucket;
   updateTableSize();
   Variable* newTable = new Variable[tableSize]();
   for(int i = 0; i < prevSize; i++){
     if(frequencyTable[i].frequency != 0){
-
+      bucket = frequencyTable[i].word;
+      loc = HASH_MOD;
+      if(!insert(bucket, newTable, loc, false)){
+        for(int j = i+1; j != i; j++){
+          if(j == tableSize) j = 0;
+          if(insert(bucket, newTable, j, false)) break;
+        }
+      }
     }
   }
+  loadFactor = numItemsInTable / tableSize;
   frequencyTable = NULL;
   delete[] frequencyTable;
   frequencyTable = newTable;
@@ -59,11 +68,11 @@ int HashTable::lookup(string bucket){
   return 0;
 }
 
-bool HashTable::insert(string bucket, Variable* frequencyTable, int loc){
+bool HashTable::insert(string bucket, Variable* frequencyTable, int loc, bool upNum){
   if(frequencyTable[loc].canInsert(bucket)){
     if(frequencyTable[loc].frequency == 0){
       frequencyTable[loc].frequency++;
-      numItemsInTable++;
+      if(upNum) numItemsInTable++;
       frequencyTable[loc].word = bucket;
     } else{
       frequencyTable[loc].frequency++;
@@ -74,19 +83,21 @@ bool HashTable::insert(string bucket, Variable* frequencyTable, int loc){
 }
 
 int HashTable::lookupInsert(string bucket){
-  int loc = HASH_MOD, startLoc;
-  if(!insert(bucket, frequencyTable, loc)){
+  int loc = HASH_MOD, startLoc, returnVar;
+  if(!insert(bucket, frequencyTable, loc, true)){
     startLoc = loc;
-    for(loc += 1; loc != startLoc; loc++){
+    for( loc++; loc != startLoc; loc++){
       if(loc == tableSize) loc = 0;
-      if(insert(bucket, frequencyTable, loc)) break;
+      if(insert(bucket, frequencyTable, loc, true)) break;
     }
   }
+  returnVar = frequencyTable[loc].frequency;
   updateLoad();
-  return frequencyTable[loc].frequency;
+  return returnVar;
 }
 
 void HashTable::updateTableSize(){
+  cout << "Old table size is: " << tableSize << endl;
   tableSize *= 2;
   bool isPrime = false;
   while(!isPrime){
@@ -96,6 +107,7 @@ void HashTable::updateTableSize(){
     }
     if(!isPrime) tableSize++;
   }
+  cout << "new table size is: " << tableSize << endl;
 }
 
 void HashTable::printTable(){
