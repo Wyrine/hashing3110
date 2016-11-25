@@ -39,7 +39,7 @@ void mainMenu(HashTable myTable){
     if(yesOrNo == 'y' || yesOrNo == 'Y'){
       cout << "Enter the word to be search for frequency count: ";
       cin >> value;
-      cout << value << " appeared " << myTable.lookup(value) << "times.\n";
+      cout << value << " appeared " << myTable.lookup(value) << " times.\n";
     }
   }while(yesOrNo == 'y' || yesOrNo == 'Y');
   cout << "Thanks for using this program! Goodbye!\n";

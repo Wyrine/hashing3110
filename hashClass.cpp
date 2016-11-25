@@ -3,17 +3,8 @@
 using namespace std;
 
 
-bool Variable::insertWord(string str){
-  if (word == str){
-    frequency++;
-    return true;
-  }
-  else if (frequency == 0){
-    word = str;
-    frequency++;
-    return true;
-  }
-  return false;
+bool Variable::canInsert(string bucket){
+  return (word == bucket || frequency == 0) ? true : false;
 }
 
 HashTable::HashTable(){
@@ -40,11 +31,11 @@ void HashTable::updateLoad(){
 
 void HashTable::reHash(){
   int prevSize = tableSize;
-  findPrime();
+  updateTableSize();
   Variable* newTable = new Variable[tableSize]();
   for(int i = 0; i < prevSize; i++){
     if(frequencyTable[i].frequency != 0){
-      
+
     }
   }
   frequencyTable = NULL;
@@ -52,14 +43,14 @@ void HashTable::reHash(){
   frequencyTable = newTable;
 }
 
-int HashTable::lookup(string value){
+int HashTable::lookup(string bucket){
   int i;
   bool reachedStart = false;
-  for(i = 0; i < value.length(); i++)
-    value[i] = tolower(value[i]);
+  for(i = 0; i < bucket.length(); i++)
+    bucket[i] = tolower(bucket[i]);
   for(i = HASH_MOD; i <= tableSize; i++){
     if(frequencyTable[i].frequency == 0) break;
-    else if(frequencyTable[i].word == value) return frequencyTable[i].frequency;
+    else if(frequencyTable[i].word == bucket) return frequencyTable[i].frequency;
     if(i==tableSize && !reachedStart){
       i = 0;
       reachedStart = true;
@@ -68,25 +59,34 @@ int HashTable::lookup(string value){
   return 0;
 }
 
-int HashTable::lookupInsert(string value){
-  int loc = HASH_MOD;
-  if(frequencyTable[loc].insertWord(value)) return frequencyTable[loc].frequency;
-  else{
-    int startLoc = loc;
-    loc++;
-    for(; loc != startLoc; loc++){
+bool HashTable::insert(string bucket, Variable* frequencyTable, int loc){
+  if(frequencyTable[loc].canInsert(bucket)){
+    if(frequencyTable[loc].frequency == 0){
+      frequencyTable[loc].frequency++;
+      numItemsInTable++;
+      frequencyTable[loc].word = bucket;
+    } else{
+      frequencyTable[loc].frequency++;
+    }
+    return true;
+  }
+  return false;
+}
+
+int HashTable::lookupInsert(string bucket){
+  int loc = HASH_MOD, startLoc;
+  if(!insert(bucket, frequencyTable, loc)){
+    startLoc = loc;
+    for(loc += 1; loc != startLoc; loc++){
       if(loc == tableSize) loc = 0;
-      if(frequencyTable[loc].insertWord(value)){
-        return frequencyTable[loc].frequency;
-      }
+      if(insert(bucket, frequencyTable, loc)) break;
     }
   }
-  numItemsInTable++;
   updateLoad();
   return frequencyTable[loc].frequency;
 }
 
-void HashTable::findPrime(){
+void HashTable::updateTableSize(){
   tableSize *= 2;
   bool isPrime = false;
   while(!isPrime){
