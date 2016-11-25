@@ -25,9 +25,18 @@ HashTable::HashTable(int size){
 
 void HashTable::updateLoad(){
   loadFactor = numItemsInTable / tableSize;
-  if(loadFactor > 0.5){
-    //rehash
+  if(loadFactor > MAX_LOAD_FACTOR){
+    rehash();
     loadFactor = numItemsInTable/tableSize;
+  }
+}
+
+void HashTable::rehash(){
+  int prevSize = tableSize;
+  findPrime();
+  Variable* newTable = new Variable[tableSize]();
+  for(int i = 0; i < prevSize; i++){
+    if(frequencyTable[i].frequency != 0) return;
   }
 }
 
@@ -60,6 +69,18 @@ int HashTable::lookupInsert(string value){
   return frequencyTable[loc].frequency;
 }
 
+void HashTable::findPrime(){
+  tableSize *= 2;
+  bool isPrime = false;
+  while(!isPrime){
+    isPrime = true;
+    for(int i = 2; i <= tableSize/2; i++){
+      if(tableSize % i == 0) isPrime = false;
+    }
+    if(!isPrime) tableSize++;
+  }
+}
+
 void HashTable::printTable(){
   for(int i = 0; i < tableSize; i++){
     if(frequencyTable[i].frequency != 0) cout << frequencyTable[i].word << endl;
@@ -73,8 +94,8 @@ HashTable::~HashTable(){
 
 unsigned long HashTable::hash(string str){
   unsigned long hash = 5381;
-  int c, i = 0;
-  while (c = (int)str[i++])
-    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+  for(int i = 0; i < str.length(); i++){
+    hash = ((hash << 5) + hash) + str[i]; /* hash * 33 + currentStringValue */
+  }
   return hash;
 }

@@ -5,6 +5,7 @@ using namespace std;
 
 
 int const DEFAULT_SIZE = 389;
+double const MAX_LOAD_FACTOR = 0.5;
 #define HASH_MOD hash(value) % tableSize
 
 struct Variable{
@@ -25,8 +26,10 @@ class HashTable{
     //int remove(const  string value);
   private:
      // Your declarations go here!
+     void rehash();
      unsigned long hash(string str);
      void updateLoad();
+     void findPrime();
      Variable *frequencyTable;
      unsigned long tableSize;
      double loadFactor;
