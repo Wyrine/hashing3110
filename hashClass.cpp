@@ -70,12 +70,10 @@ int HashTable::lookup(string bucket){
 
 bool HashTable::insert(string bucket, Variable* frequencyTable, int loc, bool upNum){
   if(frequencyTable[loc].canInsert(bucket)){
-    if(frequencyTable[loc].frequency == 0){
-      frequencyTable[loc].frequency++;
+    if(upNum) frequencyTable[loc].frequency++;
+    if(frequencyTable[loc].frequency == 1){
       if(upNum) numItemsInTable++;
       frequencyTable[loc].word = bucket;
-    } else{
-      frequencyTable[loc].frequency++;
     }
     return true;
   }
@@ -97,7 +95,6 @@ int HashTable::lookupInsert(string bucket){
 }
 
 void HashTable::updateTableSize(){
-  cout << "Old table size is: " << tableSize << endl;
   tableSize *= 2;
   bool isPrime = false;
   while(!isPrime){
@@ -107,7 +104,6 @@ void HashTable::updateTableSize(){
     }
     if(!isPrime) tableSize++;
   }
-  cout << "new table size is: " << tableSize << endl;
 }
 
 void HashTable::printTable(){
