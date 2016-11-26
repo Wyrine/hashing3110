@@ -7,7 +7,7 @@ void readFile(){
   string inData;
   if(input.fail()) exit(0);
   int tableSize = getSize();
-  HashTable myTable((tableSize == -1) ? DEFAULT_SIZE: tableSize );
+  HashTable myTable((tableSize == -1) ? : tableSize );
   double startTime = clock();
   while(input >> inData){
     myTable.lookupInsert(inData);
@@ -16,7 +16,6 @@ void readFile(){
   cout << "It took " << totalTime << " to build the frequency table.\n";
   cout << "The load factor is: " << myTable.getLoad() << endl;
   mainMenu(myTable);
-  //myTable.printTable();
   input.close();
 }
 
