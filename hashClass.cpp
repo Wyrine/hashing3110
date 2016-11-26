@@ -3,9 +3,8 @@
 using namespace std;
 
 
-bool Variable::canInsert(string bucket){
-  return (word == bucket || frequency == 0) ? true : false;
-}
+/* PUBLIC MEMBER FUNCTIONS */
+
 
 HashTable::HashTable(){
   tableSize = DEFAULT_SIZE;
@@ -21,39 +20,9 @@ HashTable::HashTable(int size){
   numItemsInTable = 0;
 }
 
-void HashTable::updateLoad(){
-  loadFactor = (double)numItemsInTable / (double)tableSize;
-  if(loadFactor >= MAX_LOAD_FACTOR){
-    reHash();
-    loadFactor = numItemsInTable/tableSize;
-  }
-}
-
-void HashTable::reHash(){
-  int prevSize = tableSize, loc;
-  string bucket;
-  updateTableSize();
-  Variable* newTable = new Variable[tableSize]();
-  for(int i = 0; i < prevSize; i++){
-    if(frequencyTable[i].frequency != 0){
-      bucket = frequencyTable[i].word;
-      loc = HASH_MOD;
-      if(!insert(bucket, newTable, loc, false)){
-        for(int j = i+1; j != i; j++){
-          if(j == tableSize) j = 0;
-          if(insert(bucket, newTable, j, false)) break;
-        }
-      }
-    }
-  }
-  loadFactor = numItemsInTable / tableSize;
-  frequencyTable = NULL;
-  delete[] frequencyTable;
-  frequencyTable = newTable;
-}
 
 int HashTable::lookup(string bucket){
-  int i;
+  unsigned int i;
   bool reachedStart = false;
   for(i = 0; i < bucket.length(); i++)
     bucket[i] = tolower(bucket[i]);
@@ -68,23 +37,11 @@ int HashTable::lookup(string bucket){
   return 0;
 }
 
-bool HashTable::insert(string bucket, Variable* frequencyTable, int loc, bool upNum){
-  if(frequencyTable[loc].canInsert(bucket)){
-    if(upNum) frequencyTable[loc].frequency++;
-    if(frequencyTable[loc].frequency == 1){
-      if(upNum) numItemsInTable++;
-      frequencyTable[loc].word = bucket;
-    }
-    return true;
-  }
-  return false;
-}
-
 int HashTable::lookupInsert(string bucket){
   int loc = HASH_MOD, startLoc, returnVar;
   if(!insert(bucket, frequencyTable, loc, true)){
     startLoc = loc;
-    for( loc++; loc != startLoc; loc++){
+    for(loc++; loc != startLoc; loc++){
       if(loc == tableSize) loc = 0;
       if(insert(bucket, frequencyTable, loc, true)) break;
     }
@@ -94,33 +51,83 @@ int HashTable::lookupInsert(string bucket){
   return returnVar;
 }
 
+void HashTable::printTable() {
+	for (unsigned int i = 0; i < tableSize; i++)
+		if (frequencyTable[i].frequency != 0)
+			cout << frequencyTable[i].word << " " << frequencyTable[i].frequency << endl;
+}
+
+
+HashTable::~HashTable() {
+	frequencyTable = NULL;
+	delete[] frequencyTable;
+}
+
+
+/* PRIVATE MEMBER FUNCTIONS */
+
+
+bool HashTable::insert(string bucket, Variable* frequencyTable, unsigned int loc, bool upNum, unsigned int prevFreq) {
+	if (frequencyTable[loc].canInsert(bucket)) {
+		if (upNum) frequencyTable[loc].frequency++;
+		else frequencyTable[loc].frequency = prevFreq;
+		if (frequencyTable[loc].frequency == 1) {
+			if (upNum) numItemsInTable++;
+			frequencyTable[loc].word = bucket;
+		}
+		return true;
+	}
+	return false;
+}
+
+unsigned long HashTable::hash(string str) {
+	unsigned long hash = 5381;
+	for (unsigned int i = 0; i < str.length(); i++) {
+		hash = ((hash << 5) + hash) + str[i]; /* hash * 33 + currentStringValue */
+	}
+	return hash;
+}
+
+void HashTable::updateLoad() {
+	loadFactor = (double)numItemsInTable / (double)tableSize;
+	if (loadFactor >= MAX_LOAD_FACTOR) {
+		reHash();
+		loadFactor = numItemsInTable / tableSize;
+	}
+}
+
 void HashTable::updateTableSize(){
   tableSize *= 2;
   bool isPrime = false;
   while(!isPrime){
     isPrime = true;
-    for(int i = 2; i <= tableSize/2; i++){
+    for(unsigned int i = 2; i <= tableSize/2; i++){
       if(tableSize % i == 0) isPrime = false;
     }
     if(!isPrime) tableSize++;
   }
 }
 
-void HashTable::printTable(){
-  for(int i = 0; i < tableSize; i++)
-    if(frequencyTable[i].frequency != 0)
-      cout << frequencyTable[i].word << " " << frequencyTable[i].frequency << endl;
-}
-
-HashTable::~HashTable(){
-  frequencyTable = NULL;
-  delete[] frequencyTable;
-}
-
-unsigned long HashTable::hash(string str){
-  unsigned long hash = 5381;
-  for(int i = 0; i < str.length(); i++){
-    hash = ((hash << 5) + hash) + str[i]; /* hash * 33 + currentStringValue */
-  }
-  return hash;
+void HashTable::reHash() {
+	unsigned int prevSize = tableSize, loc, prevFreq;
+	string bucket;
+	updateTableSize();
+	Variable* newTable = new Variable[tableSize]();
+	for (unsigned int i = 0; i < prevSize; i++) {
+		if (frequencyTable[i].frequency != 0) {
+			bucket = frequencyTable[i].word;
+			prevFreq = frequencyTable[i].frequency;
+			loc = HASH_MOD;
+			if (!insert(bucket, newTable, loc, false, prevFreq)) {
+				for (unsigned int j = i + 1; j != i; j++) {
+					if (j == tableSize) j = 0;
+					if (insert(bucket, newTable, j, false, prevFreq)) break;
+				}
+			}
+		}
+	}
+	loadFactor = numItemsInTable / tableSize;
+	frequencyTable = NULL;
+	delete[] frequencyTable;
+	frequencyTable = newTable;
 }

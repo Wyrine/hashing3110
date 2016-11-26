@@ -3,19 +3,23 @@
 using namespace std;
 
 void readFile(){
-  ifstream input("frequency.txt");
+  ifstream input("./src/frequency.txt");
   string inData;
   if(input.fail()) exit(0);
   int tableSize = getSize();
-  HashTable myTable((tableSize == -1) ? : tableSize );
+  HashTable* myTable;
+  if (tableSize == -1) myTable = new HashTable();
+  else myTable = new HashTable(tableSize);
   double startTime = clock();
   while(input >> inData){
-    myTable.lookupInsert(inData);
+    myTable->lookupInsert(inData);
   }
   double totalTime = (clock() - startTime) / CLOCKS_PER_SEC;
   cout << "It took " << totalTime << " to build the frequency table.\n";
-  cout << "The load factor is: " << myTable.getLoad() << endl;
+  cout << "The load factor is: " << myTable->getLoad() << endl;
   mainMenu(myTable);
+  myTable = NULL;
+  delete myTable;
   input.close();
 }
 
@@ -29,7 +33,7 @@ int getSize(){
   return tableSize;
 }
 
-void mainMenu(HashTable myTable){
+void mainMenu(HashTable *myTable){
   char yesOrNo;
   string value;
   do{
@@ -38,7 +42,7 @@ void mainMenu(HashTable myTable){
     if(yesOrNo == 'y' || yesOrNo == 'Y'){
       cout << "Enter the word to be search for frequency count: ";
       cin >> value;
-      cout << value << " appeared " << myTable.lookup(value) << " times.\n";
+      cout << value << " appeared " << myTable->lookup(value) << " times.\n";
     }
   }while(yesOrNo == 'y' || yesOrNo == 'Y');
   cout << "Thanks for using this program! Goodbye!\n";
