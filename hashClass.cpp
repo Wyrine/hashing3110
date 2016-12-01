@@ -63,28 +63,46 @@ int HashTable::lookup(string bucket){
 int HashTable::lookupInsert(string bucket){
   //defining some variables and setting loc to be the HASH_MOD
   int loc = HASH_MOD, startLoc, returnVar;
+  //if the value can not be inserted in this location
   if(!insert(bucket, frequencyTable, loc, true)){
+    //then we must loop, we set the startLoc to be the location where we just tried
+    //to insert
     startLoc = loc;
+    //increment loc by one to start at the next index of the array
+    //because collisions are being handled by linear probing
     for(loc++; loc != startLoc; loc++){
+      //if loc has reached the tableSize then set it to 0 to start at the beginning
       if(loc == tableSize) loc = 0;
+      //if the insertion can be done here then do so and break
       if(insert(bucket, frequencyTable, loc, true)) break;
     }
   }
+  //set the return variable to be the current index of loc's frequency
   returnVar = frequencyTable[loc].frequency;
+  //update the load and potentially rehash if there are too many elements in the table
   updateLoad();
+  //return the frequency
   return returnVar;
 }
 
+//print table loops and prints the word and frequency of all of the words in the table
+//it only prints if the frequency is greater than 0. This was purely used for debugging
 void HashTable::printTable() {
+  //looping throughout the size of the table
 	for (unsigned int i = 0; i < tableSize; i++)
-		if (frequencyTable[i].frequency != 0)
+    //if the frequency of the current elemtn is greater than 0 then print
+		if (frequencyTable[i].frequency > 0)
 			cout << frequencyTable[i].word << " " << frequencyTable[i].frequency << endl;
 }
 
-
+//the destructor deallocates the frequency Table
+//and sets the loadFactor, numItemsInTable, and tableSize to 0
 HashTable::~HashTable() {
 	frequencyTable = NULL;
 	delete[] frequencyTable;
+  loadFactor = 0.0;
+  numItemsInTable = 0;
+  tableSize = 0;
 }
 
 
