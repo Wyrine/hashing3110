@@ -90,7 +90,7 @@ int HashTable::lookupInsert(string bucket){
 void HashTable::printTable() {
   //looping throughout the size of the table
 	for (unsigned int i = 0; i < tableSize; i++)
-    //if the frequency of the current elemtn is greater than 0 then print
+    //if the frequency of the current element is greater than 0 then print
 		if (frequencyTable[i].frequency > 0)
 			cout << frequencyTable[i].word << " " << frequencyTable[i].frequency << endl;
 }
@@ -108,17 +108,33 @@ HashTable::~HashTable() {
 
 /* PRIVATE MEMBER FUNCTIONS */
 
-
-bool HashTable::insert(string bucket, Variable* frequencyTable, unsigned int loc, bool upNum, unsigned int prevFreq) {
-	if (frequencyTable[loc].canInsert(bucket)) {
-		if (upNum) frequencyTable[loc].frequency++;
-		else frequencyTable[loc].frequency = prevFreq;
-		if (frequencyTable[loc].frequency == 1) {
-			if (upNum) numItemsInTable++;
-			frequencyTable[loc].word = bucket;
-		}
+//insert is at the heart of this program. It is a function that returns a boolean, true being the item has been inserted
+//and false being the item cannot be inserted here. It is used for both rehashing and insertion. The way it differentiates
+//the two is through the parameter upNum. If upNum is true then it knows that it is inserting into a new table
+//and if upNum is false then it is reHashing. The only real difference between the two is either incrementing
+//frequency and numItemsInTable (original insertion) or just copying over the frequency into the new table (rehashing)
+//if upNum is false then prevFreq is going to be the frequency associated with the word in the previous table
+bool HashTable::insert(string bucket, Variable* frequencyTable, unsigned int loc, bool upNum, unsigned int prevFreq){
+  //calling the canInsert method of the variable class to see
+  //if the bucket can be inserted in this location or not if so
+  // then insert otherwise return false
+	if (frequencyTable[loc].canInsert(bucket)){
+    //if upNum is true then we are not rehashing
+		if (upNum){
+      frequencyTable[loc].frequency++;
+      if(frequencyTable[loc].frequency == 1){
+        frequencyTable[loc].word = bucket;
+        numItemsInTable++;
+      }
+    }	else { //otherwise we are rehashing
+      //copy over frequency and the bucket into the frequencyTable
+      frequencyTable[loc].frequency = prevFreq;
+      frequencyTable[loc].word = bucket;
+    }
+    //return true when the item actually has been inserted
 		return true;
 	}
+  //return false when canInsert returns false
 	return false;
 }
 
