@@ -3,6 +3,6 @@
 #include <time.h>
 #include "hashClass.h"
 
-void readFile();
+void readFile(string fileName);
 int getSize();
 void mainMenu(HashTable *myTable);

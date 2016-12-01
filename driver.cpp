@@ -2,8 +2,8 @@
 
 using namespace std;
 
-void readFile(){
-  ifstream input("./src/frequency.txt");
+void readFile(string fileName){
+  ifstream input(fileName);
   string inData;
   if(input.fail()) exit(0);
   int tableSize = getSize();
