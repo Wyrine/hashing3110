@@ -189,26 +189,46 @@ void HashTable::updateTableSize(){
   }
 }
 
+//rehash is called whenever the loadFactor is >= MAX_LOAD_FACTOR and it creates
+//a new table with the size being at least double the current tableSize but the
+//tableSize is always going to be a prime number and then loops and hashes all of the elements from the old
+//into the new one and then deletes the old table and replaces it with the new table
 void HashTable::reHash() {
+  //setting the prevSize to be the old tableSize
+  //and making some other variables
 	unsigned int prevSize = tableSize, loc, prevFreq;
 	string bucket;
+  //getting a new tableSize
 	updateTableSize();
+  //allocating a new table with that new tableSize
 	Variable* newTable = new Variable[tableSize]();
+  //looping through the old table from start to end
 	for (unsigned int i = 0; i < prevSize; i++) {
+    //if the frequency of the current element is not 0
 		if (frequencyTable[i].frequency != 0) {
+      //copying the data members of this index from the old table
 			bucket = frequencyTable[i].word;
 			prevFreq = frequencyTable[i].frequency;
+      //hashing that word with the new tableSize
 			loc = HASH_MOD;
+      //attempt to insert into the new table
 			if (!insert(bucket, newTable, loc, false, prevFreq)) {
+        //if insertion fails then there was a collision, begin looping starting at i+1
+        //and end the loop when j and i are the same
 				for (unsigned int j = i + 1; j != i; j++) {
+          //if j is the tableSize then set it to 0 to start at the first element
 					if (j == tableSize) j = 0;
+          //attempt to insert, if insertion succeeds then break
 					if (insert(bucket, newTable, j, false, prevFreq)) break;
 				}
 			}
 		}
 	}
+  //update the loadFactor
 	loadFactor = numItemsInTable / tableSize;
+  //deallocate the oldTable
 	frequencyTable = NULL;
 	delete[] frequencyTable;
+  //set frequencyTable to be the new table
 	frequencyTable = newTable;
 }
