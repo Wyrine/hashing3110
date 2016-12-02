@@ -1,3 +1,7 @@
+//Kirolos Shahat
+//HashTable member function definitions
+//hashClass.cpp
+
 #include "hashClass.h"
 
 using namespace std;
