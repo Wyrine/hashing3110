@@ -66,21 +66,8 @@ int HashTable::lookup(string bucket){
 //frequency of the words location
 int HashTable::lookupInsert(string bucket){
   //defining some variables and setting loc to be the HASH_MOD
-  int loc = HASH_MOD, startLoc, returnVar;
-  //if the value can not be inserted in this location
-  if(!insert(bucket, frequencyTable, loc, true)){
-    //then we must loop, we set the startLoc to be the location where we just tried
-    //to insert
-    startLoc = loc;
-    //increment loc by one to start at the next index of the array
-    //because collisions are being handled by linear probing
-    for(loc++; loc != startLoc; loc++){
-      //if loc has reached the tableSize then set it to 0 to start at the beginning
-      if(loc == tableSize) loc = 0;
-      //if the insertion can be done here then do so and break
-      if(insert(bucket, frequencyTable, loc, true)) break;
-    }
-  }
+  unsigned int loc = HASH_MOD, startLoc, returnVar;
+  insert(bucket, frequencyTable, loc, true);
   //set the return variable to be the current index of loc's frequency
   returnVar = frequencyTable[loc].frequency;
   //update the load and potentially rehash if there are too many elements in the table
@@ -118,26 +105,30 @@ HashTable::~HashTable() {
 //and if upNum is false then it is reHashing. The only real difference between the two is either incrementing
 //frequency and numItemsInTable (original insertion) or just copying over the frequency into the new table (rehashing)
 //if upNum is false then prevFreq is going to be the frequency associated with the word in the previous table
-bool HashTable::insert(string bucket, Variable* frequencyTable, unsigned int loc, bool upNum, unsigned int prevFreq){
+bool HashTable::insert(string bucket, Variable* newTable, unsigned int &loc, bool upNum, unsigned int prevFreq){
   //calling the canInsert method of the variable class to see
   //if the bucket can be inserted in this location or not if so
   // then insert otherwise return false
-	if (frequencyTable[loc].canInsert(bucket)){
-    //if upNum is true then we are not rehashing
-		if (upNum){
-      frequencyTable[loc].frequency++;
-      if(frequencyTable[loc].frequency == 1){
-        frequencyTable[loc].word = bucket;
-        numItemsInTable++;
+  unsigned int curLoc = loc;
+  do{
+    if(curLoc == tableSize ) curLoc = 0;
+    if(newTable[curLoc].canInsert(bucket)){
+      loc = curLoc;
+      if (upNum){
+        newTable[loc].frequency++;
+        if(newTable[loc].frequency == 1){
+          newTable[loc].word = bucket;
+          numItemsInTable++;
+        }
+      }	else { //otherwise we are rehashing
+        //copy over frequency and the bucket into the newTable
+        newTable[loc].frequency = prevFreq;
+        newTable[loc].word = bucket;
       }
-    }	else { //otherwise we are rehashing
-      //copy over frequency and the bucket into the frequencyTable
-      frequencyTable[loc].frequency = prevFreq;
-      frequencyTable[loc].word = bucket;
+      return true;
     }
-    //return true when the item actually has been inserted
-		return true;
-	}
+    curLoc++;
+  }while(curLoc != loc);
   //return false when canInsert returns false
 	return false;
 }
@@ -162,7 +153,7 @@ void HashTable::updateLoad() {
     //reHash
 		reHash();
     //get the new loadFactor after reHash
-		loadFactor = numItemsInTable / tableSize;
+    updateLoad();
 	}
 }
 
@@ -205,23 +196,14 @@ void HashTable::reHash() {
   //looping through the old table from start to end
 	for (unsigned int i = 0; i < prevSize; i++) {
     //if the frequency of the current element is not 0
-		if (frequencyTable[i].frequency != 0) {
+		if (frequencyTable[i].frequency > 0) {
       //copying the data members of this index from the old table
 			bucket = frequencyTable[i].word;
 			prevFreq = frequencyTable[i].frequency;
       //hashing that word with the new tableSize
 			loc = HASH_MOD;
       //attempt to insert into the new table
-			if (!insert(bucket, newTable, loc, false, prevFreq)) {
-        //if insertion fails then there was a collision, begin looping starting at i+1
-        //and end the loop when j and i are the same
-				for (unsigned int j = i + 1; j != i; j++) {
-          //if j is the tableSize then set it to 0 to start at the first element
-					if (j == tableSize) j = 0;
-          //attempt to insert, if insertion succeeds then break
-					if (insert(bucket, newTable, j, false, prevFreq)) break;
-				}
-			}
+      insert(bucket, newTable, loc, false, prevFreq);
 		}
 	}
   //update the loadFactor

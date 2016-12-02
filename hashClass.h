@@ -53,7 +53,7 @@ class HashTable{
   	 unsigned int numItemsInTable;
 
   	 //private method prototypes
-     bool insert(string bucket, Variable* frequencyTable, unsigned int loc, bool upNum, unsigned int prevFreq = 0);
+     bool insert(string bucket, Variable* frequencyTable, unsigned int &loc, bool upNum, unsigned int prevFreq = 0);
   	 unsigned long hash(string str);
   	 void updateLoad();
   	 void updateTableSize();
