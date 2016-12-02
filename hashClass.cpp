@@ -138,30 +138,49 @@ bool HashTable::insert(string bucket, Variable* frequencyTable, unsigned int loc
 	return false;
 }
 
+//the provided hashing function
 unsigned long HashTable::hash(string str) {
 	unsigned long hash = 5381;
+  //loops for the length of the string
 	for (unsigned int i = 0; i < str.length(); i++) {
-		hash = ((hash << 5) + hash) + str[i]; /* hash * 33 + currentStringValue */
+    // hash * 33 + currentStringValue
+		hash = ((hash << 5) + hash) + str[i];
 	}
 	return hash;
 }
 
+//updateLoad updates the loadFactor and calls reHash if the loadFactor is too high
 void HashTable::updateLoad() {
+  //items currently in the table / the current tableSize becomes the loadFactor
 	loadFactor = (double)numItemsInTable / (double)tableSize;
+  //if the loadFactor is > = the MAX_LOAD_FACTOR
 	if (loadFactor >= MAX_LOAD_FACTOR) {
+    //reHash
 		reHash();
+    //get the new loadFactor after reHash
 		loadFactor = numItemsInTable / tableSize;
 	}
 }
 
+//update table size doubles current table size and increments by 1 until it finds a tableSize
+//that is prime and sets that as the new tableSize. This is used for rehashing
 void HashTable::updateTableSize(){
+  //double the tableSize
   tableSize *= 2;
+  //set isPrime to false
   bool isPrime = false;
+  //loop while isPrime is false
   while(!isPrime){
+    //assume the current number is prime by setting isPrime to true
     isPrime = true;
+    //loop from 2 to tableSize/2
     for(unsigned int i = 2; i <= tableSize/2; i++){
-      if(tableSize % i == 0) isPrime = false;
+      //if the new tableSize is evenly divisible by the current i
+      if(tableSize % i == 0)
+        //then set isPrime to false;
+        isPrime = false;
     }
+    //if isPrime is false increment the tableSize by 1
     if(!isPrime) tableSize++;
   }
 }
