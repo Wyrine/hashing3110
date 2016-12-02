@@ -26,7 +26,7 @@ void readFile(string fileName){
   //creating a hashTable pointer and if tableSize is -1 call the default constructor
   //otherwise call the one argument constructor with the size provided by the user
   HashTable* myTable = (tableSize == -1) ? new HashTable() : new HashTable(tableSize);
-  //
+  //getting the starting time
   double startTime = clock();
   //while there is data to read from the input file, read it into inData
   while(input >> inData){
@@ -38,7 +38,8 @@ void readFile(string fileName){
   //the table has been fully created. Call userUpdate to give the user the information needed
   userUpdate(myTable, startTime);
   //calling mainMenu to ask the user stuff
-  mainMenu(myTable);
+  //mainMenu(myTable);
+  myTable->printTable();
   //deallocating the class allocation
   myTable = NULL;
   delete myTable;
