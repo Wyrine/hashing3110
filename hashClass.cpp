@@ -67,6 +67,7 @@ int HashTable::lookup(string bucket){
 int HashTable::lookupInsert(string bucket){
   //defining some variables and setting loc to be the HASH_MOD
   unsigned int loc = HASH_MOD, startLoc, returnVar;
+  //call insert to put the bucket into the table
   insert(bucket, frequencyTable, loc, true);
   //set the return variable to be the current index of loc's frequency
   returnVar = frequencyTable[loc].frequency;
@@ -99,38 +100,42 @@ HashTable::~HashTable() {
 
 /* PRIVATE MEMBER FUNCTIONS */
 
-//insert is at the heart of this program. It is a function that returns a boolean, true being the item has been inserted
-//and false being the item cannot be inserted here. It is used for both rehashing and insertion. The way it differentiates
-//the two is through the parameter upNum. If upNum is true then it knows that it is inserting into a new table
-//and if upNum is false then it is reHashing. The only real difference between the two is either incrementing
-//frequency and numItemsInTable (original insertion) or just copying over the frequency into the new table (rehashing)
-//if upNum is false then prevFreq is going to be the frequency associated with the word in the previous table
-bool HashTable::insert(string bucket, Variable* newTable, unsigned int &loc, bool upNum, unsigned int prevFreq){
-  //calling the canInsert method of the variable class to see
-  //if the bucket can be inserted in this location or not if so
-  // then insert otherwise return false
+//insert is at the heart of this program. It purely checks to see if the element can be inserted
+//in the current location and if it can then it does so, otherwise it loops to the next element
+//in the scope version of frequencyTable in case of rehashing and attempts to do the same there
+void HashTable::insert(string bucket, Variable* frequencyTable, unsigned int loc, bool upNum,
+  unsigned int prevFreq){
+  //assigning the curLoc to be the value of loc incase of a collision
   unsigned int curLoc = loc;
   do{
+    //this is only needed in a collision case, if the curLoc is the same as the tableSize
+    //then we set it to 0 so we don't access elements outside of our range.
     if(curLoc == tableSize ) curLoc = 0;
-    if(newTable[curLoc].canInsert(bucket)){
-      loc = curLoc;
-      if (upNum){
-        newTable[loc].frequency++;
-        if(newTable[loc].frequency == 1){
-          newTable[loc].word = bucket;
+    //if we can insert in this location
+    if(frequencyTable[curLoc].canInsert(bucket)){
+      if (upNum){ //if we are inserting normally and not rehashing
+        //increment the frequency
+        frequencyTable[curLoc].frequency++;
+        //if this word is not in the table
+        if(frequencyTable[curLoc].frequency == 1){
+          //copy the bucket over to the current location
+          frequencyTable[curLoc].word = bucket;
+          //update the number of elements in the table
           numItemsInTable++;
         }
       }	else { //otherwise we are rehashing
-        //copy over frequency and the bucket into the newTable
-        newTable[loc].frequency = prevFreq;
-        newTable[loc].word = bucket;
+        //copy over frequency and the bucket into the frequencyTable
+        frequencyTable[curLoc].frequency = prevFreq;
+        frequencyTable[curLoc].word = bucket;
       }
-      return true;
+      //return since insertion is complete
+      return;
     }
+    //if we have gotten here then a collision has occurred, so we try the next
+    //element by incrementing curLoc by 1
     curLoc++;
+  //and loop while curLoc is not the same as loc which is our starting location
   }while(curLoc != loc);
-  //return false when canInsert returns false
-	return false;
 }
 
 //the provided hashing function
@@ -152,7 +157,8 @@ void HashTable::updateLoad() {
 	if (loadFactor >= MAX_LOAD_FACTOR) {
     //reHash
 		reHash();
-    //get the new loadFactor after reHash
+    //call this function again in case that reHash did not change the loadFactor by much
+    //which this will only be useful for smaller table sizes
     updateLoad();
 	}
 }
@@ -182,8 +188,8 @@ void HashTable::updateTableSize(){
 
 //rehash is called whenever the loadFactor is >= MAX_LOAD_FACTOR and it creates
 //a new table with the size being at least double the current tableSize but the
-//tableSize is always going to be a prime number and then loops and hashes all of the elements from the old
-//into the new one and then deletes the old table and replaces it with the new table
+//tableSize is always going to be a prime number and then loops through the old table
+//and hashes each element into the new table and calls insert to insert it
 void HashTable::reHash() {
   //setting the prevSize to be the old tableSize
   //and making some other variables
@@ -195,14 +201,14 @@ void HashTable::reHash() {
 	Variable* newTable = new Variable[tableSize]();
   //looping through the old table from start to end
 	for (unsigned int i = 0; i < prevSize; i++) {
-    //if the frequency of the current element is not 0
+    //if the frequency of the current element is greater than 0
 		if (frequencyTable[i].frequency > 0) {
       //copying the data members of this index from the old table
 			bucket = frequencyTable[i].word;
 			prevFreq = frequencyTable[i].frequency;
       //hashing that word with the new tableSize
 			loc = HASH_MOD;
-      //attempt to insert into the new table
+      //inserting into the new table
       insert(bucket, newTable, loc, false, prevFreq);
 		}
 	}

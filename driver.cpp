@@ -38,8 +38,9 @@ void readFile(string fileName){
   //the table has been fully created. Call userUpdate to give the user the information needed
   userUpdate(myTable, startTime);
   //calling mainMenu to ask the user stuff
-  //mainMenu(myTable);
-  myTable->printTable();
+  mainMenu(myTable);
+  //the function below is used to debug and it prints all of the words in the table with frequency
+  //myTable->printTable();
   //deallocating the class allocation
   myTable = NULL;
   delete myTable;
